@@ -58,7 +58,7 @@ class SmsReceiver : BroadcastReceiver() {
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe {
-                Log.i("tag", "${it.errno},${it.errmsg},${it.dataset}")
+                Log.i("tag", "短信验证码：${it.errno},${it.errmsg},${it.dataset}")
             }
 
     }
