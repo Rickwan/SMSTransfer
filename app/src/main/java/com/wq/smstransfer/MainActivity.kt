@@ -4,28 +4,26 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import com.tbruyelle.rxpermissions2.RxPermissions
-import android.telephony.PhoneStateListener
-import android.system.Os.listen
-import android.content.Context.TELEPHONY_SERVICE
 import android.os.Handler
 import android.os.Message
+import android.support.v7.app.AppCompatActivity
+import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
+import android.text.TextUtils
 import android.util.Log
+import android.widget.TextView
+import com.tbruyelle.rxpermissions2.RxPermissions
 import com.wq.smstransfer.net.NetworkRequest
+import com.wq.smstransfer.utils.PhoneUtils
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import android.text.TextUtils
-import android.widget.TextView
-import com.wq.smstransfer.utils.PhoneUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var startTv: TextView
-    
+
     private lateinit var currentTv: TextView
 
     val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -88,10 +86,12 @@ class MainActivity : AppCompatActivity() {
             tm.listen(object : PhoneStateListener() {
                 override fun onCallStateChanged(state: Int, phoneNumber: String?) {
 
-                    if (lastCallState === TelephonyManager.CALL_STATE_RINGING && state == TelephonyManager.CALL_STATE_IDLE) {
+                    if (lastCallState == TelephonyManager.CALL_STATE_RINGING && state == TelephonyManager.CALL_STATE_IDLE) {
                         Log.i("tag", "有未接来电:$phoneNumber")
                         queryPhoneNumber(phoneNumber!!)
+                        lastCallState = TelephonyManager.CALL_STATE_IDLE
                     }
+                    Log.i("tag", "lastCallState:$lastCallState,state:$state")
                     lastCallState = state
                     super.onCallStateChanged(state, phoneNumber)
                 }
