@@ -1,11 +1,19 @@
 package com.wq.kotlin.service
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
-import android.os.Handler
 import android.os.IBinder
-import android.os.Message
+import android.telephony.PhoneStateListener
+import android.telephony.TelephonyManager
+import android.text.TextUtils
 import android.util.Log
+import com.wq.smstransfer.net.NetworkRequest
+import com.wq.smstransfer.utils.PhoneUtils
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * @author wq
@@ -14,10 +22,14 @@ import android.util.Log
  */
 class CommonService : Service() {
 
+    private var lastCallState = TelephonyManager.CALL_STATE_IDLE
+
+    private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
     override fun onCreate() {
         super.onCreate()
         Log.i("tag", "onCreate")
+
     }
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -29,47 +41,62 @@ class CommonService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        Log.i("tag", "onStartCommand,startId:$startId")
-
-        if (count > 0) {
-            Log.i("tag", "current count is :$count")
-
-            mHandler.removeMessages(0)
-
-            stopSelf()
-
-        } else {
-            mHandler.sendEmptyMessage(0)
-
-        }
-
+        telephony()
         return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mHandler.removeMessages(0)
 
-        Log.i("tag", "onDestroy")
+    private fun telephony() {
+        val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        try {
+            tm.listen(object : PhoneStateListener() {
+                override fun onCallStateChanged(state: Int, phoneNumber: String?) {
 
-    }
+                    if (lastCallState == TelephonyManager.CALL_STATE_RINGING && state == TelephonyManager.CALL_STATE_IDLE) {
 
-    var count = 0
-    private var mHandler = object : Handler() {
-        override fun handleMessage(msg: Message?) {
-            super.handleMessage(msg)
-            Log.i("tag", "$count")
-            count++
-            if (count == 100) {
+                        queryPhoneNumber(phoneNumber!!)
+                        lastCallState = TelephonyManager.CALL_STATE_IDLE
+                    }else{
+                        lastCallState = state
+                    }
 
-                this.removeMessages(0)
-                stopSelf()
-            } else {
-                this.sendEmptyMessageDelayed(0, 1000)
-            }
-
+                    Log.i("tag","未接来电：$state")
+                    super.onCallStateChanged(state, phoneNumber)
+                }
+            }, PhoneStateListener.LISTEN_CALL_STATE)
+        } catch (e: Exception) {
+            lastCallState = TelephonyManager.CALL_STATE_IDLE
+            Log.i("tag","异常")
         }
+
     }
 
+    private fun queryPhoneNumber(phoneNumber: String) {
+
+        var contactName = PhoneUtils.queryContact(this, phoneNumber)
+
+        if (TextUtils.isEmpty(contactName)) {
+            return
+        }
+        var date = format.format(Date(System.currentTimeMillis()))
+        var text = "您有未接来电！"
+        var des = "您有未接来电！，{$contactName}{$phoneNumber}于{$date}给您来电，请注意查看！"
+
+        Log.i("tag", "$des")
+
+        sendMessage(text, des)
+    }
+
+    private fun sendMessage(text: String, des: String) {
+
+        NetworkRequest.getInstance()
+            .sendMessage(NetworkRequest.SECRET_KEY, text, des)
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe {
+
+                Log.i("tag","$des\n未接来电：${it.errno},${it.errmsg},${it.dataset}")
+            }
+    }
 
 }
