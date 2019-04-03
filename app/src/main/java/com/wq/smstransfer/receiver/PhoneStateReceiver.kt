@@ -3,7 +3,9 @@ package com.wq.smstransfer.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.telephony.PhoneStateListener
+import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.Log
@@ -15,46 +17,56 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
+
+
 class PhoneStateReceiver : BroadcastReceiver() {
 
     private var lastCallState = TelephonyManager.CALL_STATE_IDLE
 
-    private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    private lateinit var format: SimpleDateFormat
+
+    private lateinit var telephonyManager: TelephonyManager
+
+    private lateinit var mContext: Context
+
+    private lateinit var label :String
 
     override fun onReceive(context: Context?, intent: Intent?) {
 
-        telephony(context!!)
+
+        mContext = context!!
+        format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        telephonyManager = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE)
+        label = format.format(Date())
+
+        Log.i("tag","PhoneStateReceiver:$label")
+
     }
 
-    private fun telephony(context: Context) {
-        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        try {
+    private var listener = object : PhoneStateListener() {
+        override fun onCallStateChanged(state: Int, phoneNumber: String?) {
+            super.onCallStateChanged(state, phoneNumber)
 
-            tm.listen(object : PhoneStateListener() {
-                override fun onCallStateChanged(state: Int, phoneNumber: String?) {
-                    super.onCallStateChanged(state, phoneNumber)
+            Log.i("tag", "state:$state:$label")
+            if (lastCallState == TelephonyManager.CALL_STATE_RINGING && state == TelephonyManager.CALL_STATE_IDLE) {
 
-                    Log.i("tag","$state")
-                    if (lastCallState == TelephonyManager.CALL_STATE_RINGING && state == TelephonyManager.CALL_STATE_IDLE) {
+//                lastCallState = TelephonyManager.CALL_STATE_IDLE
+                Binder.clearCallingIdentity()
+                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
+                queryPhoneNumber(phoneNumber!!)
 
-                        queryPhoneNumber(context, phoneNumber!!)
-                        lastCallState = TelephonyManager.CALL_STATE_IDLE
-                    } else {
-                        lastCallState = state
-                    }
+            } else {
+            }
+            lastCallState = state
 
-                }
-            }, PhoneStateListener.LISTEN_CALL_STATE)
-        } catch (e: Exception) {
-            lastCallState = TelephonyManager.CALL_STATE_IDLE
         }
-
     }
 
 
-    private fun queryPhoneNumber(context: Context, phoneNumber: String) {
+    private fun queryPhoneNumber(phoneNumber: String) {
 
-        var contactName = PhoneUtils.queryContact(context, phoneNumber)
+        var contactName = PhoneUtils.queryContact(mContext, phoneNumber)
 
         if (TextUtils.isEmpty(contactName)) {
             return
@@ -64,6 +76,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
         var des = "您有未接来电！，{$contactName}{$phoneNumber}于{$date}给您来电，请注意查看！"
 
         sendMessage(text, des)
+        sendSMS(phoneNumber)
     }
 
     private fun sendMessage(text: String, des: String) {
@@ -77,4 +90,12 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 Log.i("tag", "{$des}\n\n未接来电：${it.errno},${it.errmsg},${it.dataset}")
             }
     }
+
+
+    private fun sendSMS(phoneNumber: String){
+
+        var manager= SmsManager.getDefault()
+        manager.sendTextMessage(phoneNumber!!,null,"您好，我当前不方便接听您的电话，请通过其它方式联系我。【此消息为自动回复】",null,null)
+  }
 }
+

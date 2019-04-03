@@ -2,14 +2,12 @@ package com.wq.smstransfer
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.tbruyelle.rxpermissions2.RxPermissions
-import com.wq.kotlin.service.CommonService
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,14 +41,14 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.READ_PHONE_STATE,
                 Manifest.permission.READ_CONTACTS,
                 Manifest.permission.READ_SMS,
-                Manifest.permission.RECEIVE_SMS
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.SEND_SMS
             )
             .subscribe {
                 if (!it) {
                     showAlertDialog()
                 } else {
 
-//                    startService()
                     var date = format.format(Date(System.currentTimeMillis()))
                     startTv.text = "开始运行：$date"
                     mHandler.sendEmptyMessage(0)
@@ -74,10 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun startService() {
-        var intent = Intent(this, CommonService::class.java)
-        startService(intent)
-    }
+
 
 
     override fun onDestroy() {
