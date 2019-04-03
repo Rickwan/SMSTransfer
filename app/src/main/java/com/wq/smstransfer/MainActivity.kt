@@ -2,22 +2,18 @@ package com.wq.smstransfer
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.support.v7.app.AppCompatActivity
-import android.widget.TextView
 import com.tbruyelle.rxpermissions2.RxPermissions
+import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var startTv: TextView
-
-    private lateinit var currentTv: TextView
-
-    private lateinit var stateTv: TextView
 
     val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
@@ -25,10 +21,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        startTv = findViewById(R.id.start_tv)
-        currentTv = findViewById(R.id.current_tv)
-        stateTv = findViewById(R.id.state_tv)
         requestPermissions()
+
+        toolBar.inflateMenu(R.menu.base_toolbar_menu)
+        toolBar.setOnMenuItemClickListener {
+            if (it.itemId == R.id.action_setting) {
+                var intent = Intent(this, SettingActivity::class.java)
+                startActivity(intent)
+            }
+
+            return@setOnMenuItemClickListener true
+        }
 
     }
 
@@ -50,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
 
                     var date = format.format(Date(System.currentTimeMillis()))
-                    startTv.text = "开始运行：$date"
+                    start_tv.text = "开始运行：$date"
                     mHandler.sendEmptyMessage(0)
                 }
             }
@@ -73,8 +76,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
     override fun onDestroy() {
         super.onDestroy()
         mHandler.removeMessages(0)
@@ -90,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             this.sendEmptyMessageDelayed(0, 1000)
 
             var date = format.format(Date(System.currentTimeMillis()))
-            currentTv.text = "当前运行：$date"
+            current_tv.text = "当前运行：$date"
         }
     }
 }

@@ -9,14 +9,13 @@ import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.Log
+import com.cheny.base.utils.SharePreHelper
 import com.wq.smstransfer.net.NetworkRequest
 import com.wq.smstransfer.utils.PhoneUtils
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.text.SimpleDateFormat
 import java.util.*
-
-
 
 
 class PhoneStateReceiver : BroadcastReceiver() {
@@ -29,10 +28,17 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
     private lateinit var mContext: Context
 
-    private lateinit var label :String
+    private lateinit var label: String
 
     override fun onReceive(context: Context?, intent: Intent?) {
 
+        var isChecked = SharePreHelper.instance.getBooleanData(SharePreHelper.PHONE_CALL, true)
+
+        Log.i("tag", "isChecked:$isChecked")
+
+        if (!isChecked) {
+            return
+        }
 
         mContext = context!!
         format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -40,7 +46,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
         telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE)
         label = format.format(Date())
 
-        Log.i("tag","PhoneStateReceiver:$label")
+        Log.i("tag", "PhoneStateReceiver:$label")
 
     }
 
@@ -76,7 +82,13 @@ class PhoneStateReceiver : BroadcastReceiver() {
         var des = "您有未接来电！，{$contactName}{$phoneNumber}于{$date}给您来电，请注意查看！"
 
         sendMessage(text, des)
-        sendSMS(phoneNumber)
+
+
+        var isChecked = SharePreHelper.instance.getBooleanData(SharePreHelper.PHONE_CALL_SMS_FEEDBACK)
+
+        if (isChecked) {
+            sendSMS(phoneNumber)
+        }
     }
 
     private fun sendMessage(text: String, des: String) {
@@ -92,10 +104,10 @@ class PhoneStateReceiver : BroadcastReceiver() {
     }
 
 
-    private fun sendSMS(phoneNumber: String){
+    private fun sendSMS(phoneNumber: String) {
 
-        var manager= SmsManager.getDefault()
-        manager.sendTextMessage(phoneNumber!!,null,"您好，我当前不方便接听您的电话，请通过其它方式联系我。【此消息为自动回复】",null,null)
-  }
+        var manager = SmsManager.getDefault()
+        manager.sendTextMessage(phoneNumber!!, null, "您好，我当前不方便接听您的电话，请通过其它方式联系我。【此消息为自动回复】", null, null)
+    }
 }
 

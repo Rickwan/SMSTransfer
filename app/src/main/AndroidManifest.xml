@@ -16,14 +16,18 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
+            android:name=".APP"
             android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+                  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
+        <activity android:name=".SettingActivity"
+                  android:screenOrientation="portrait"/>
 
         <receiver android:name=".receiver.SmsReceiver" android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="2147483647">
@@ -36,8 +40,7 @@
         <service android:name="com.wq.kotlin.service.CommonService"/>
 
         <receiver android:name=".receiver.PhoneStateReceiver"
-                  android:enabled="true"
-                  android:process=":PhoneListenService">>
+                  android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE"/>
             </intent-filter>

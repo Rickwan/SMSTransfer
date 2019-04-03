@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.telephony.SmsMessage
 import android.util.Log
+import com.cheny.base.utils.SharePreHelper
 import com.wq.smstransfer.net.NetworkRequest
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -19,6 +20,13 @@ import java.util.regex.Pattern
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(p0: Context?, p1: Intent?) {
+
+
+        var isChecked = SharePreHelper.instance.getBooleanData(SharePreHelper.SMS_CODE, true)
+
+        if (!isChecked) {
+            return
+        }
 
         val datas = p1?.extras?.get("pdus") as Array<Any>
 
