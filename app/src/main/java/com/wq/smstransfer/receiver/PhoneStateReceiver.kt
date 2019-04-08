@@ -34,8 +34,6 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
         var isChecked = SharePreHelper.instance.getBooleanData(SharePreHelper.PHONE_CALL, true)
 
-        Log.i("tag", "isChecked:$isChecked")
-
         if (!isChecked) {
             return
         }
@@ -62,7 +60,6 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
                 queryPhoneNumber(phoneNumber!!)
 
-            } else {
             }
             lastCallState = state
 

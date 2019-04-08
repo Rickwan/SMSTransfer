@@ -37,14 +37,15 @@
         </receiver>
 
 
-        <service android:name="com.wq.kotlin.service.CommonService"/>
-
         <receiver android:name=".receiver.PhoneStateReceiver"
                   android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE"/>
             </intent-filter>
         </receiver>
+
+        <service android:name="com.wq.kotlin.service.CommonService"/>
+
     </application>
 
 </manifest>
