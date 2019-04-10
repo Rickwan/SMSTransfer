@@ -9,7 +9,10 @@ import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.Log
+import androidx.room.Room
 import com.cheny.base.utils.SharePreHelper
+import com.wq.smstransfer.db.dao.AppDatabase
+import com.wq.smstransfer.db.entity.PhoneCallRecord
 import com.wq.smstransfer.net.NetworkRequest
 import com.wq.smstransfer.utils.PhoneUtils
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -74,6 +77,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
         if (TextUtils.isEmpty(contactName)) {
             return
         }
+
         var date = format.format(Date(System.currentTimeMillis()))
         var text = "您有未接来电！"
         var des = "您有未接来电！，{$contactName}{$phoneNumber}于{$date}给您来电，请注意查看！"
@@ -86,8 +90,17 @@ class PhoneStateReceiver : BroadcastReceiver() {
         if (isChecked) {
             sendSMS(phoneNumber)
         }
+
+        var phoneCallRecord =
+            PhoneCallRecord(phoneNumber, contactName,System.currentTimeMillis(), isChecked)
+
+        updateSQLite(phoneCallRecord)
     }
 
+
+    /**
+     * 推送信息
+     */
     private fun sendMessage(text: String, des: String) {
 
         NetworkRequest.getInstance()
@@ -101,10 +114,28 @@ class PhoneStateReceiver : BroadcastReceiver() {
     }
 
 
+    /**
+     * 给来电方发送短信
+     */
     private fun sendSMS(phoneNumber: String) {
 
         var manager = SmsManager.getDefault()
         manager.sendTextMessage(phoneNumber!!, null, "您好，我当前不方便接听您的电话，请通过其它方式联系我。【此消息为自动回复】", null, null)
+    }
+
+
+    /**
+     * 更新本地数据库
+     */
+    private fun updateSQLite(phoneCallRecord: PhoneCallRecord) {
+
+        val db = Room.databaseBuilder(
+            mContext,
+            AppDatabase::class.java, "SMSTransfer"
+        ).allowMainThreadQueries().build()
+
+        db.phoneCallRecordDao().insertAll(phoneCallRecord)
+
     }
 }
 

@@ -1,10 +1,10 @@
-package com.wq.smstransfer
+package com.wq.smstransfer.ui
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.widget.CompoundButton
+import androidx.appcompat.app.AppCompatActivity
 import com.cheny.base.utils.SharePreHelper
+import com.wq.smstransfer.R
 import kotlinx.android.synthetic.main.activity_setting.*
 
 /**

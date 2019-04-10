@@ -1,4 +1,4 @@
-package com.wq.smstransfer
+package com.wq.smstransfer.ui
 
 import android.app.Application
 import com.cheny.base.utils.SharePreHelper

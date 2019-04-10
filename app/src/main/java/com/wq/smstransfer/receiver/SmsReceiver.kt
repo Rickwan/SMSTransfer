@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.telephony.SmsMessage
 import android.util.Log
+import androidx.room.Room
 import com.cheny.base.utils.SharePreHelper
+import com.wq.smstransfer.db.dao.AppDatabase
+import com.wq.smstransfer.db.entity.SMSMessage
 import com.wq.smstransfer.net.NetworkRequest
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -19,7 +22,7 @@ import java.util.regex.Pattern
  */
 class SmsReceiver : BroadcastReceiver() {
 
-    override fun onReceive(p0: Context?, p1: Intent?) {
+    override fun onReceive(context:  Context?, intent: Intent?) {
 
 
         var isChecked = SharePreHelper.instance.getBooleanData(SharePreHelper.SMS_CODE, true)
@@ -28,14 +31,15 @@ class SmsReceiver : BroadcastReceiver() {
             return
         }
 
-        val datas = p1?.extras?.get("pdus") as Array<Any>
+        val datas = intent?.extras?.get("pdus") as Array<Any>
 
-        val format = p1?.getStringExtra("format")
+        val format = intent?.getStringExtra("format")
         val sb = StringBuilder()
+        var mobile: String? = null
         for (pdus in datas) {
             val pdusMsg = pdus as ByteArray
             val sms = SmsMessage.createFromPdu(pdusMsg, format)
-//            var mobile = sms.originatingAddress
+            mobile = sms.originatingAddress
             sb.append(sms.messageBody)
         }
 
@@ -44,6 +48,9 @@ class SmsReceiver : BroadcastReceiver() {
             var code = matcherCode(sb.toString())
             sendMessage("验证码:$code", sb.toString())
 
+//            var smsMessage = SMSMessage(mobile, sb.toString(), System.currentTimeMillis())
+//
+//            updateSQLite(context!!, smsMessage)
         }
     }
 
@@ -59,6 +66,9 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
 
+    /**
+     * 推送信息
+     */
     private fun sendMessage(text: String, des: String) {
 
         NetworkRequest.getInstance()
@@ -71,5 +81,19 @@ class SmsReceiver : BroadcastReceiver() {
 
     }
 
+
+    /**
+     * 更新本地数据库
+     */
+    private fun updateSQLite(context: Context, smsMessage: SMSMessage) {
+
+        val db = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java, "SMSTransfer"
+        ).allowMainThreadQueries().build()
+
+        db.smsmessageDao().insertAll(smsMessage)
+
+    }
 
 }

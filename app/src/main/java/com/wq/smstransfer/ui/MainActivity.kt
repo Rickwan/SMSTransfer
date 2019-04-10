@@ -1,4 +1,4 @@
-package com.wq.smstransfer
+package com.wq.smstransfer.ui
 
 import android.Manifest
 import android.app.AlertDialog
@@ -6,8 +6,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.wq.smstransfer.R
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,7 +34,13 @@ class MainActivity : AppCompatActivity() {
             return@setOnMenuItemClickListener true
         }
 
+        phone_call_record_btn.setOnClickListener {
+            var intent = Intent(this, PhoneCallRecordActivity::class.java)
+            startActivity(intent)
+        }
+
     }
+
 
     private fun requestPermissions() {
 

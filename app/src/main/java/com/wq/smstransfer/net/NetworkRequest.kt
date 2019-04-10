@@ -19,7 +19,7 @@ class NetworkRequest {
 
         private val url = "https://sc.ftqq.com/"
 
-         val SECRET_KEY = "SCU47331T3a529c231357cf40ba74d7d285708e985c9dcd64ee4af"
+         const val SECRET_KEY = "SCU47331T3a529c231357cf40ba74d7d285708e985c9dcd64ee4af"
 
         private var service: Interfaces? = null
 
