@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.wq.smstransfer.db.entity.PhoneCallRecord
 import io.reactivex.Flowable
+import retrofit2.http.Query
 
 /**
  * @author wq
@@ -15,7 +16,8 @@ import io.reactivex.Flowable
 @Dao
 interface PhoneCallRecordDao {
 
-    @Query("SELECT * FROM PhoneCallRecord")
+//    @Query("SELECT * FROM PhoneCallRecord ORDER BY date DESC ,isFeedback ASC")
+    @Query("SELECT * FROM PhoneCallRecord ORDER BY date DESC")
     fun getAll(): Flowable<List<PhoneCallRecord>>
 
     @Query("SELECT * FROM PhoneCallRecord")

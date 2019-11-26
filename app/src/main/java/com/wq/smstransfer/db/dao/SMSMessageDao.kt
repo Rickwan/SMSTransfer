@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.wq.smstransfer.db.entity.SMSMessage
+import retrofit2.http.Query
 
 /**
  * @author wq

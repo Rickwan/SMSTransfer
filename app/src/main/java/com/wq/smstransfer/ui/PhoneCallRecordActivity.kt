@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import com.wq.smstransfer.PhoneCallRecordAdapter
 import com.wq.smstransfer.db.dao.AppDatabase
 import com.wq.smstransfer.db.entity.PhoneCallRecord
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -37,7 +36,7 @@ class PhoneCallRecordActivity : AppCompatActivity() {
 
     private fun initData(records: List<PhoneCallRecord>) {
 
-        adapter = PhoneCallRecordAdapter(this,records)
+        adapter = PhoneCallRecordAdapter(this, records)
 
         var layoutManager=LinearLayoutManager(this)
 
@@ -57,8 +56,6 @@ class PhoneCallRecordActivity : AppCompatActivity() {
             this,
             AppDatabase::class.java, "SMSTransfer"
         ).build()
-
-        Log.i("tag", "---------------queryOn IO Thread---------------")
 
 
         db.phoneCallRecordDao().getAll()

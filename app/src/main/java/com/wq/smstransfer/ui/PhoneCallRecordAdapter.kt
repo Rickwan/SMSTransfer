@@ -1,4 +1,4 @@
-package com.wq.smstransfer
+package com.wq.smstransfer.ui
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.wq.smstransfer.R
 import com.wq.smstransfer.db.entity.PhoneCallRecord
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,16 +30,24 @@ class PhoneCallRecordAdapter(context: Context) : RecyclerView.Adapter<PhoneCallR
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        return ViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_layout_phone_call_record, parent, false))
+        return ViewHolder(
+            LayoutInflater.from(mContext).inflate(
+                R.layout.item_layout_phone_call_record,
+                parent,
+                false
+            )
+        )
     }
 
     override fun getItemCount(): Int {
 
-        return if (mDatas == null) {
-            0
-        } else {
-            mDatas!!.size
-        }
+//        return if (mDatas == null) {
+//            0
+//        } else {
+//            mDatas!!.size
+//        }
+
+        return mDatas?.size ?: 0
 
     }
 
